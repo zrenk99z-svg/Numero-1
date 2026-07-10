@@ -11,20 +11,22 @@ export const TRACKING = -150;
 export const NX = GLYPH_R.advance + TRACKING;
 
 /**
- * Brand-adjusted R: the official monogram's counter (the hole in the R) is
- * noticeably larger and rounder than stock Archivo Black. The outer contour
- * is untouched; only the counter subpath is replaced (scaled ×1.6 vertically
- * about its center, cap radius follows) to match the approved logo.
+ * Brand-adjusted R: the approved monogram's counter (the hole in the R) is
+ * slightly larger than stock Archivo Black. Measured off the identity PDF's
+ * hero mark (vector raster, cap = 760): counter 325.3..565.9 × 173.1..334.5
+ * (stock: 325.9..554.5 × 173.4..313.7). Outer contour untouched; only the
+ * counter subpath is replaced.
  */
 const R_OUTER = GLYPH_R.d.slice(0, GLYPH_R.d.indexOf('ZM') + 1);
 const BRAND_R_COUNTER =
-  'M595.61 287.12Q595.61 239.41 563.81 207.59Q532.00 175.81 486.05 175.81' +
-  'L325.87 175.81L325.87 400.21L486.05 400.21' +
-  'Q532.00 400.21 563.81 367.51Q595.61 334.81 595.61 287.12Z';
+  'M565.88 253.17Q565.88 218.87 544.96 196.00Q524.05 173.14 493.83 173.14' +
+  'L325.32 173.14L325.32 334.47L493.83 334.47' +
+  'Q524.05 334.47 544.96 310.97Q565.88 287.47 565.88 253.17Z';
 export const BRAND_R_D = `${R_OUTER}${BRAND_R_COUNTER}`;
 
-export const DOT_R = 84;
-export const DOT_GAP = 44;
+// Dot metrics measured from the same hero mark: r = 70.4 u, 32.3 u gap.
+export const DOT_R = 70;
+export const DOT_GAP = 32;
 export const DOT_CX = NX + GLYPH_N.bbox.x2 + DOT_GAP + DOT_R;
 export const DOT_CY = 760 - DOT_R; // ember rests ON the baseline
 
