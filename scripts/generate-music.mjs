@@ -166,11 +166,11 @@ const bass = (b, note = E1, len = 0.5, amp = 0.24) => {
   });
 };
 
-const stab = (b, notes, amp = 0.16, tau = 0.32) => {
+const stab = (b, notes, amp = 0.16, tau = 0.32, dur = 1.4, cutoff = 3400) => {
   for (const f of notes) {
-    voice(beat(b), 1.4, f, {
+    voice(beat(b), dur, f, {
       amp: amp / Math.sqrt(notes.length),
-      cutoff: 3400,
+      cutoff,
       detunes: [-0.006, 0, 0.006],
       attack: 0.006,
       tau,
@@ -281,13 +281,14 @@ lead(7, G3, 0.5, 0.15);
 lead(7.5, A3, 1.0, 0.15);
 lead(8.5, G3, 0.45, 0.12);
 
-// Beat 9 (5.875 s) — final chord, ring out into the breath
-kick(beat(9), 0.33);
-stab(9, [E2, G2, B2, E3], 0.21, 0.7);
-hat(beat(9), 0.06, true);
+// Beat 9 (5.875 s) — final chord: an octave deeper, dark, ringing long
+kick(beat(9), 0.36);
+stab(9, [E2, G2, B2], 0.26, 1.15, 2.4, 2300); // low Em, muted top, long decay
+sine(beat(9), 1.6, 55, 41.2, 0.14, 0.55); // sub root sinking to E1
+hat(beat(9), 0.05, true);
 
 // low pulse aligned with the ember's breathing resolution
-sine(6.2, 0.4, 55, 41, 0.09, 0.16);
+sine(6.25, 0.4, 55, 41, 0.08, 0.16);
 
 // ----------------------------------------------------------------- master --
 // 1) Glue reverb: Schroeder combs + allpass on a high-passed wet bus (bass
@@ -331,6 +332,42 @@ sine(6.2, 0.4, 55, 41, 0.09, 0.16);
   for (let i = N - 1; i >= 97; i--) R[i] += (acc[i - 97] / 3) * 0.035;
 }
 
+// 1b) Ending hall: a longer, darker reverb fed only by the final chord
+//     (from beat 9), so the intro closes in a big black room.
+{
+  const t0 = Math.round(beat(9) * SR);
+  const t1 = Math.round(6.7 * SR);
+  const src = new Float64Array(N);
+  for (let i = t0; i < Math.min(t1, N); i++) src[i] = (L[i] + R[i]) * 0.5;
+  const combs = [
+    [Math.round(0.0563 * SR), 0.8],
+    [Math.round(0.0717 * SR), 0.77],
+    [Math.round(0.0837 * SR), 0.74],
+  ];
+  const acc = new Float64Array(N);
+  for (const [d, g] of combs) {
+    const buf = new Float64Array(d);
+    for (let i = t0; i < N; i++) {
+      const j = i % d;
+      const y = src[i] + buf[j] * g;
+      acc[i] += buf[j];
+      buf[j] = y;
+    }
+  }
+  // darken the tail (one-pole LP ~2.2 kHz) and spread it slightly
+  const lpA = 1 - Math.exp((-2 * Math.PI * 2200) / SR);
+  let lpL = 0;
+  let lpR = 0;
+  const off = Math.round(0.0021 * SR);
+  for (let i = t0; i < N; i++) {
+    lpL += lpA * (acc[i] / 3 - lpL);
+    const k = i - off;
+    lpR += lpA * ((k >= 0 ? acc[k] : 0) / 3 - lpR);
+    L[i] += lpL * 0.3;
+    R[i] += lpR * 0.3;
+  }
+}
+
 // 2) Bus compressor: envelope follower, ~3:1 above the knee — raises RMS
 {
   let env = 0;
@@ -346,8 +383,8 @@ sine(6.2, 0.4, 55, 41, 0.09, 0.16);
   }
 }
 
-// 3) Fade + mandated 4 frames of true silence
-const FADE_START = 6.5;
+// 3) Fade + mandated 4 frames of true silence (tail breathes until 6.6 s)
+const FADE_START = 6.6;
 const SILENCE = 164 / 24;
 const fs0 = Math.round(FADE_START * SR);
 const s0 = Math.round(SILENCE * SR);
