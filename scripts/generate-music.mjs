@@ -195,8 +195,8 @@ const lead = (b, f, lenBeats, amp = 0.11) =>
 // ------------------------------------------------------------- diegetics ---
 // (kept from the sound-design mix so picture sync is preserved)
 const strike = (t) => {
-  noiseHit(t, 0.05, {amp: 0.4, lp: 9000, hp: 2400, tau: 0.012});
-  noiseHit(t + 0.02, 0.35, {amp: 0.1, lp: 5000, hp: 900, tau: 0.16});
+  noiseHit(t, 0.05, {amp: 0.26, lp: 9000, hp: 2400, tau: 0.012});
+  noiseHit(t + 0.02, 0.35, {amp: 0.06, lp: 5000, hp: 900, tau: 0.16});
 };
 const crackle = (t0, t1, rate, amp) => {
   let t = t0;
@@ -229,64 +229,65 @@ const whoosh = (t0, dur, amp) => {
 };
 
 // ============================================================ arrangement ==
+// Mix philosophy: the score LEADS; diegetic SFX sit underneath it.
 // Scene 1 — void; the match strike is the pickup
 strike(0.5);
-crackle(0.55, 6.5, 7, 0.045);
+crackle(0.55, 6.5, 7, 0.022);
 
 // Bar 1 (beats 1–4): liftoff → engraving. The riff wakes up and drives.
 const riffBar1 = [
   [1, E1], [1.5, E1], [2, E1], [2.5, E1], [3, G1], [3.5, A1],
 ];
 for (const [b, n] of riffBar1) {
-  const ramp = 0.13 + 0.11 * ((b - 1) / 2.5); // crescendo into the hit
+  const ramp = 0.18 + 0.15 * ((b - 1) / 2.5); // crescendo into the hit
   bass(b, n, 0.48, ramp);
 }
-for (let b = 1; b <= 3.5; b += 0.5) hat(beat(b), 0.028 + 0.012 * (b / 3.5));
+for (let b = 1; b <= 3.5; b += 0.5) hat(beat(b), 0.034 + 0.014 * (b / 3.5));
 // tom fill sprinting into the fusion
-tom(beat(3.25), 150, 0.13);
-tom(beat(3.5), 130, 0.16);
-tom(beat(3.75), 110, 0.2);
-// riser under the engraving whooshes
-whoosh(1.05, 0.6, 0.09); // carving the R
-whoosh(1.78, 0.42, 0.1); // carving the N
-noiseHit(1.1, 1.58, {amp: 0.05, lp: 3200, hp: 300, tau: 1.6});
+tom(beat(3.25), 150, 0.16);
+tom(beat(3.5), 130, 0.2);
+tom(beat(3.75), 110, 0.25);
+// riser under the engraving whooshes (ducked under the riff)
+whoosh(1.05, 0.6, 0.05); // carving the R
+whoosh(1.78, 0.42, 0.055); // carving the N
+noiseHit(1.1, 1.58, {amp: 0.03, lp: 3200, hp: 300, tau: 1.6});
 
 // Beat 4 (2.75 s) — FUSION: the hit
-sine(2.75, 1.0, 78, 30, 0.5, 0.3); // sub drop
-kick(beat(4), 0.34);
-crash(beat(4), 0.1);
-stab(4, [E2, B2, E3, G3], 0.17, 0.38); // Em power stab, brass-like
+sine(2.75, 1.0, 78, 30, 0.55, 0.3); // sub drop
+kick(beat(4), 0.42);
+crash(beat(4), 0.13);
+stab(4, [E2, B2, E3, G3], 0.23, 0.38); // Em power stab, brass-like
 
 // Bar 2 (beats 4–8): full groove, monogram cooling, ember signing
 const riffBar2 = [
   [4.5, E1], [5, E1], [5.5, E1], [6.5, E1], [7, G1], [7.5, A1], [8, E1],
 ];
-for (const [b, n] of riffBar2) bass(b, n, 0.48, 0.22);
-kick(beat(5), 0.24);
-snare(beat(5), 0.15);
-kick(beat(7), 0.2);
-snare(beat(7), 0.16);
+for (const [b, n] of riffBar2) bass(b, n, 0.48, 0.3);
+kick(beat(5), 0.3);
+snare(beat(5), 0.19);
+kick(beat(7), 0.26);
+snare(beat(7), 0.2);
 // sixteenth hats with eighth-note accents — drive without harshness
 for (let b = 4.25; b <= 8.75; b += 0.25) {
   const accent = (b * 4) % 2 === 0;
-  hat(beat(b) + (rng() - 0.5) * 0.003, accent ? 0.042 : 0.02);
+  hat(beat(b) + (rng() - 0.5) * 0.003, accent ? 0.05 : 0.024);
 }
 
 // Beat 6 (4.0 s) — THE LANDING: tight accent, then the horn hook signs off
-kick(beat(6), 0.3);
-stab(6, [G2, E3], 0.1, 0.2);
-lead(6.5, E3, 0.5);
-lead(7, G3, 0.5);
-lead(7.5, A3, 1.0);
-lead(8.5, G3, 0.45, 0.09);
+kick(beat(6), 0.38);
+stab(6, [G2, E3], 0.14, 0.2);
+lead(6.5, E3, 0.5, 0.15);
+lead(7, G3, 0.5, 0.15);
+lead(7.5, A3, 1.0, 0.15);
+lead(8.5, G3, 0.45, 0.12);
 
 // Beat 9 (5.875 s) — final chord, ring out into the breath
-kick(beat(9), 0.26);
-stab(9, [E2, G2, B2, E3], 0.15, 0.7);
-hat(beat(9), 0.05, true);
+kick(beat(9), 0.33);
+stab(9, [E2, G2, B2, E3], 0.21, 0.7);
+hat(beat(9), 0.06, true);
 
 // low pulse aligned with the ember's breathing resolution
-sine(6.2, 0.4, 55, 41, 0.07, 0.16);
+sine(6.2, 0.4, 55, 41, 0.09, 0.16);
 
 // ----------------------------------------------------------------- master --
 // 1) Glue reverb: Schroeder combs + allpass on a high-passed wet bus (bass
