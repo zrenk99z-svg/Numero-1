@@ -203,7 +203,7 @@ Same 7 s choreography. Adaptation rules:
 | Asset | Status |
 |---|---|
 | Archivo Black / Space Mono (TTF, SIL OFL) | ✔ bundled `public/fonts/` |
-| RN letterforms | ✔ extracted from Archivo Black into `src/intro/glyphs.ts` (regenerate: `node scripts/extract-glyphs.mjs`). If an official hand-tuned monogram vector exists, drop its two path `d` strings into `glyphs.ts`. |
+| RN letterforms | ✔ extracted from Archivo Black into `src/intro/glyphs.ts` (regenerate: `node scripts/extract-glyphs.mjs`). The R's counter is brand-adjusted (enlarged ×1.6 vertically, `BRAND_R_D` in `geometry.ts`) and the dot is r 84 u with a 44 u gap, matching the approved logo. If an official vector exists, drop its path `d` strings in. |
 | Sound mix | ⚠ placeholder synth included — **needs licensed final mix (−14 LUFS)** |
 | Everything else (particles, glow, grain, camera) | ✔ procedural, deterministic |
 

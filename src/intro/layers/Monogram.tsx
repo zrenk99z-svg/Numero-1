@@ -2,8 +2,8 @@ import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {COLORS, EMBER_RGB} from '../constants';
 import {groupOffsetX} from '../ember';
-import {MARK_CX, MARK_CY, NX, SKELETONS, type Layout} from '../geometry';
-import {GLYPH_N, GLYPH_R} from '../glyphs';
+import {BRAND_R_D, MARK_CX, MARK_CY, NX, SKELETONS, type Layout} from '../geometry';
+import {GLYPH_N} from '../glyphs';
 import type {IntroTiming} from '../timings';
 
 const CLAMP = {
@@ -135,7 +135,7 @@ export const Monogram: React.FC<Props> = ({t, layout, variant}) => {
 
   const glyphGroup = (glyph: 'R' | 'N') => {
     const maskId = `rn-mask-${glyph}-${variant}`;
-    const d = glyph === 'R' ? GLYPH_R.d : GLYPH_N.d;
+    const d = glyph === 'R' ? BRAND_R_D : GLYPH_N.d;
     return (
       <g transform={glyphTransform(glyph)}>
         <defs>
