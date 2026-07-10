@@ -1,54 +1,54 @@
-# Remotion video
+# Refúgio Nerd — Intro "A Brasa Que Não Apaga"
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+The channel's opening animation, built entirely in [Remotion](https://remotion.dev).
+From a dead-black void, a single ember ignites, engraves the RN monogram like
+hot steel, and signs the brand as the glowing period after the N — *the ember
+that never dies*.
 
-Welcome to your Remotion project!
+**Full production spec** (storyboard, layer-by-layer animation tables, AI-video
+prompts, soundtrack brief, version notes): [`docs/INTRO_SPEC.md`](docs/INTRO_SPEC.md).
+
+## Compositions
+
+| ID | Format | Duration |
+|---|---|---|
+| `RefugioNerdIntro` | 3840×2160 · 24 fps | 7 s (168 f) — master |
+| `RefugioNerdIntroShort` | 3840×2160 · 24 fps | 3 s (72 f) — Scenes 4–6 |
+| `RefugioNerdIntroVertical` | 1080×1920 · 24 fps | 7 s — Shorts/Reels |
 
 ## Commands
 
-**Install Dependencies**
-
 ```console
-npm i
+npm i               # install
+npm run dev         # Remotion Studio preview
+npx remotion render RefugioNerdIntro out/intro-4k.mp4
+npx remotion render RefugioNerdIntroShort out/intro-short.mp4
+npx remotion render RefugioNerdIntroVertical out/intro-vertical.mp4
 ```
 
-**Start Preview**
+In sandboxed/CI environments without network access to Remotion's headless
+Chrome download, point at a system Chromium:
+`REMOTION_BROWSER_EXECUTABLE=/path/to/chromium npx remotion render …`
 
-```console
-npm run dev
+## Project layout
+
+```
+src/intro/
+  timings.ts        every animated event, in frames (single source of truth)
+  geometry.ts       monogram layout, stroke skeletons, responsive mapping
+  glyphs.ts         exact Archivo Black R/N outlines (generated)
+  ember.ts          the ember's full journey + breathing
+  CameraRig.tsx     dolly, impact shake, handheld drift
+  layers/           Monogram · Ember · Particles · Atmosphere · TitleLockup · Framing
+scripts/
+  extract-glyphs.mjs   regenerate glyphs.ts from the bundled font
+  generate-audio.mjs   regenerate the placeholder sound mix
+public/fonts/          Archivo Black + Space Mono (SIL OFL)
+public/audio/          placeholder mixes — replace with the licensed final mix
 ```
 
-**Render video**
+## Brand guardrails (baked in)
 
-```console
-npx remotion render
-```
-
-**Upgrade Remotion**
-
-```console
-npx remotion upgrade
-```
-
-## Docs
-
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
-
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+Palette is fixed (`#141210` / `#FF7A2E` / `#E7DFCE`); the ember is the only
+light source; the ember only ever rests after the N, on the baseline; the
+monogram is never distorted; total length never exceeds 7 seconds.

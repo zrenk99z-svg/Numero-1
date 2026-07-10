@@ -1,46 +1,47 @@
-import "./index.css";
-import { Composition } from "remotion";
-import { HelloWorld, myCompSchema } from "./HelloWorld";
-import { Logo, myCompSchema2 } from "./HelloWorld/Logo";
+import './index.css';
+import './fonts';
+import {Composition} from 'remotion';
+import {RefugioNerdIntro} from './intro/RefugioNerdIntro';
+import {TIMINGS} from './intro/timings';
 
-// Each <Composition> is an entry in the sidebar!
-
+/**
+ * REFÚGIO NERD — channel intro package.
+ *
+ *  RefugioNerdIntro          7 s master, 3840×2160 @ 24 fps
+ *  RefugioNerdIntroShort     3 s version (Scenes 4–6 only)
+ *  RefugioNerdIntroVertical  7 s, 1080×1920 (9:16 Shorts)
+ *
+ * Render: npx remotion render RefugioNerdIntro out/intro-4k.mp4
+ */
 export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Composition
-        // You can take the "id" to render a video:
-        // npx remotion render HelloWorld
-        id="HelloWorld"
-        component={HelloWorld}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-        // You can override these props for each render:
-        // https://www.remotion.dev/docs/parametrized-rendering
-        schema={myCompSchema}
-        defaultProps={{
-          titleText: "Welcome to Remotion",
-          titleColor: "#000000",
-          logoColor1: "#91EAE4",
-          logoColor2: "#86A8E7",
-        }}
+        id="RefugioNerdIntro"
+        component={RefugioNerdIntro}
+        durationInFrames={TIMINGS.full.duration}
+        fps={24}
+        width={3840}
+        height={2160}
+        defaultProps={{variant: 'full' as const}}
       />
-
-      {/* Mount any React component to make it show up in the sidebar and work on it individually! */}
       <Composition
-        id="OnlyLogo"
-        component={Logo}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-        schema={myCompSchema2}
-        defaultProps={{
-          logoColor1: "#91dAE2" as const,
-          logoColor2: "#86A8E7" as const,
-        }}
+        id="RefugioNerdIntroShort"
+        component={RefugioNerdIntro}
+        durationInFrames={TIMINGS.short.duration}
+        fps={24}
+        width={3840}
+        height={2160}
+        defaultProps={{variant: 'short' as const}}
+      />
+      <Composition
+        id="RefugioNerdIntroVertical"
+        component={RefugioNerdIntro}
+        durationInFrames={TIMINGS.full.duration}
+        fps={24}
+        width={1080}
+        height={1920}
+        defaultProps={{variant: 'full' as const}}
       />
     </>
   );

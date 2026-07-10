@@ -7,19 +7,18 @@
   "private": true,
   "dependencies": {
     "@remotion/cli": "4.0.487",
-    "@remotion/zod-types": "4.0.487",
+    "@remotion/fonts": "4.0.487",
+    "@remotion/paths": "4.0.487",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "remotion": "4.0.487",
-    "zod": "4.3.6",
-    "@remotion/tailwind-v4": "4.0.487",
-    "tailwindcss": "4.0.0"
+    "remotion": "4.0.487"
   },
   "devDependencies": {
     "@remotion/eslint-config-flat": "4.0.487",
     "@types/react": "19.2.7",
     "@types/web": "0.0.166",
     "eslint": "9.19.0",
+    "opentype.js": "1.3.4",
     "prettier": "3.8.1",
     "typescript": "5.9.3"
   },

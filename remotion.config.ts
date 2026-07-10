@@ -3,9 +3,13 @@
 
 // Note: When using the Node.JS APIs, the config file doesn't apply. Instead, pass options directly to the APIs
 
-import { Config } from "@remotion/cli/config";
-import { enableTailwind } from '@remotion/tailwind-v4';
+import {Config} from '@remotion/cli/config';
 
-Config.setVideoImageFormat("jpeg");
+Config.setVideoImageFormat('jpeg');
 Config.setOverwriteOutput(true);
-Config.overrideWebpackConfig(enableTailwind);
+
+// Allows sandboxed/CI environments to reuse a system Chromium instead of
+// downloading Remotion's headless shell (e.g. Playwright's browser).
+if (process.env.REMOTION_BROWSER_EXECUTABLE) {
+  Config.setBrowserExecutable(process.env.REMOTION_BROWSER_EXECUTABLE);
+}
