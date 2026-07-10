@@ -143,8 +143,9 @@ const E1 = 41.2, G1 = 49.0, A1 = 55.0;
 const E2 = 82.4, G2 = 98.0, B2 = 123.5;
 const E3 = 164.8, G3 = 196.0, A3 = 220.0;
 
-const bass = (b, note = E1, len = 0.5, amp = 0.24) =>
-  voice(beat(b), len * BEAT, note, {
+const bass = (b, note = E1, len = 0.5, amp = 0.24) => {
+  const t = beat(b) + (rng() - 0.5) * 0.003; // human timing
+  voice(t, len * BEAT, note, {
     amp,
     cutoff: 2600,
     detunes: [0, 0.004],
@@ -152,6 +153,18 @@ const bass = (b, note = E1, len = 0.5, amp = 0.24) =>
     release: 0.03,
     sub: 0.5,
   });
+  // pick transient — the "chug"
+  noiseHit(t, 0.008, {amp: amp * 0.35, lp: 5200, hp: 1200, tau: 0.004});
+  // gritty guitar double one octave up, palm-muted
+  voice(t, len * BEAT * 0.8, note * 2, {
+    amp: amp * 0.62,
+    cutoff: 3800,
+    detunes: [-0.007, 0.007],
+    tau: 0.11,
+    release: 0.025,
+    pan: -0.18,
+  });
+};
 
 const stab = (b, notes, amp = 0.16, tau = 0.32) => {
   for (const f of notes) {
@@ -250,10 +263,14 @@ const riffBar2 = [
 ];
 for (const [b, n] of riffBar2) bass(b, n, 0.48, 0.22);
 kick(beat(5), 0.24);
-snare(beat(5), 0.13);
+snare(beat(5), 0.15);
 kick(beat(7), 0.2);
-snare(beat(7), 0.14);
-for (let b = 4.5; b <= 8.5; b += 0.5) hat(beat(b), 0.04);
+snare(beat(7), 0.16);
+// sixteenth hats with eighth-note accents — drive without harshness
+for (let b = 4.25; b <= 8.75; b += 0.25) {
+  const accent = (b * 4) % 2 === 0;
+  hat(beat(b) + (rng() - 0.5) * 0.003, accent ? 0.042 : 0.02);
+}
 
 // Beat 6 (4.0 s) — THE LANDING: tight accent, then the horn hook signs off
 kick(beat(6), 0.3);
@@ -272,8 +289,65 @@ hat(beat(9), 0.05, true);
 sine(6.2, 0.4, 55, 41, 0.07, 0.16);
 
 // ----------------------------------------------------------------- master --
+// 1) Glue reverb: Schroeder combs + allpass on a high-passed wet bus (bass
+//    stays dry and tight), 14% mix — room instead of beeps in a vacuum.
+{
+  const hpA = 1 - Math.exp((-2 * Math.PI * 420) / SR);
+  const wet = new Float64Array(N);
+  let hp = 0;
+  for (let i = 0; i < N; i++) {
+    const m = (L[i] + R[i]) * 0.5;
+    hp += hpA * (m - hp);
+    wet[i] = m - hp;
+  }
+  const combs = [
+    [Math.round(0.0297 * SR), 0.72],
+    [Math.round(0.0371 * SR), 0.68],
+    [Math.round(0.0411 * SR), 0.64],
+  ];
+  const acc = new Float64Array(N);
+  for (const [d, g] of combs) {
+    const buf = new Float64Array(d);
+    for (let i = 0; i < N; i++) {
+      const j = i % d;
+      const y = wet[i] + buf[j] * g;
+      acc[i] += buf[j];
+      buf[j] = y;
+    }
+  }
+  const ap = Math.round(0.005 * SR);
+  const apBuf = new Float64Array(ap);
+  for (let i = 0; i < N; i++) {
+    const j = i % ap;
+    const x = acc[i] / 3;
+    const y = -0.5 * x + apBuf[j];
+    apBuf[j] = x + 0.5 * y;
+    // slightly decorrelated L/R for width
+    L[i] += y * 0.14;
+    R[i] += y * 0.13;
+  }
+  // tiny Haas offset for width on the wet tail
+  for (let i = N - 1; i >= 97; i--) R[i] += (acc[i - 97] / 3) * 0.035;
+}
+
+// 2) Bus compressor: envelope follower, ~3:1 above the knee — raises RMS
+{
+  let env = 0;
+  const atk = 1 - Math.exp(-1 / (0.005 * SR));
+  const rel = 1 - Math.exp(-1 / (0.13 * SR));
+  for (let i = 0; i < N; i++) {
+    const x = Math.max(Math.abs(L[i]), Math.abs(R[i]));
+    env += (x > env ? atk : rel) * (x - env);
+    const over = Math.max(0, env - 0.32);
+    const g = 1 / (1 + 2.2 * over);
+    L[i] *= g;
+    R[i] *= g;
+  }
+}
+
+// 3) Fade + mandated 4 frames of true silence
 const FADE_START = 6.5;
-const SILENCE = 164 / 24; // 4 frames of true silence before the cut
+const SILENCE = 164 / 24;
 const fs0 = Math.round(FADE_START * SR);
 const s0 = Math.round(SILENCE * SR);
 for (let i = 0; i < N; i++) {
@@ -286,12 +360,14 @@ for (let i = 0; i < N; i++) {
     R[i] *= g * g;
   }
 }
+
+// 4) Hot but clean limiter: normalize toward -1 dBFS with soft knee
 let peak = 0;
 for (let i = 0; i < N; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
-const gain = peak > 0 ? 0.72 / peak : 1;
+const gain = peak > 0 ? 0.98 / peak : 1;
 for (let i = 0; i < N; i++) {
-  L[i] = Math.tanh(L[i] * gain * 1.15) / Math.tanh(1.15);
-  R[i] = Math.tanh(R[i] * gain * 1.15) / Math.tanh(1.15);
+  L[i] = Math.tanh(L[i] * gain * 1.35) / Math.tanh(1.35);
+  R[i] = Math.tanh(R[i] * gain * 1.35) / Math.tanh(1.35);
 }
 
 const out = Buffer.alloc(44 + N * 4);
