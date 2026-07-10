@@ -15,6 +15,8 @@ export type RefugioNerdIntroProps = {
   variant: Variant;
   /** omit the FILMES · SÉRIES · HQs line (default: shown) */
   showTagline?: boolean;
+  /** override the soundtrack (path under public/), e.g. the original score */
+  audioFile?: string;
 };
 
 /**
@@ -24,6 +26,7 @@ export type RefugioNerdIntroProps = {
 export const RefugioNerdIntro: React.FC<RefugioNerdIntroProps> = ({
   variant,
   showTagline = true,
+  audioFile,
 }) => {
   const {width, height} = useVideoConfig();
   const t = TIMINGS[variant];
@@ -31,7 +34,7 @@ export const RefugioNerdIntro: React.FC<RefugioNerdIntroProps> = ({
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.black, overflow: 'hidden'}}>
-      <Audio src={staticFile(t.audioFile)} />
+      <Audio src={staticFile(audioFile ?? t.audioFile)} />
       <CameraRig t={t} layout={layout}>
         <Atmosphere t={t} layout={layout} />
         <svg
