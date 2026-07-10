@@ -68,7 +68,7 @@ const skelEnd = (frame: number, t: IntroTiming, i: number) =>
   toWorld(frame, t, SKELETONS[i].glyph, pointOnSkeleton(i, 1));
 
 /** Smooth banked noise, deterministic per seed lane. */
-const noise = (frame: number, lane: string) => {
+export const noise = (frame: number, lane: string) => {
   const f0 = Math.floor(frame);
   const u = frame - f0;
   const a = random(`${lane}-${f0}`) - 0.5;

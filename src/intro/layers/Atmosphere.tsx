@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, random, useCurrentFrame} from 'remotion';
 import {CREAM_RGB, EMBER_RGB} from '../constants';
-import {emberAt} from '../ember';
+import {emberAt, noise} from '../ember';
 import {worldToScreen, type Layout} from '../geometry';
 import type {IntroTiming} from '../timings';
 
@@ -23,8 +23,9 @@ export const Atmosphere: React.FC<Props> = ({t, layout}) => {
   const e = emberAt(frame, t);
   const es = worldToScreen(layout, e.x, e.y);
 
-  // spill breathes with the ember's heat
-  const spill = e.visible ? e.heat : 0;
+  // spill breathes with the ember's heat — and flickers like real firelight
+  const flicker = 0.9 + 0.1 * noise(frame * 1.7, 'fire');
+  const spill = e.visible ? e.heat * flicker : 0;
 
   // dust motes — nearly invisible, only alive near the light
   const motes: React.ReactNode[] = [];
@@ -36,8 +37,10 @@ export const Atmosphere: React.FC<Props> = ({t, layout}) => {
     const x = bx + Math.sin(frame / 70 + i * 2.3) * drift + frame * 0.12 * su * (random(`${seed}w`) - 0.5);
     const y = by + Math.cos(frame / 90 + i * 1.7) * drift * 0.7 - frame * 0.05 * su;
     const dist = Math.hypot(x - es.x, y - es.y);
-    const lightBoost = e.visible ? 0.16 * Math.exp(-(dist * dist) / (2 * (620 * su) ** 2)) * e.heat : 0;
-    const opacity = 0.045 + lightBoost;
+    const lightBoost = e.visible ? 0.16 * Math.exp(-(dist * dist) / (2 * (620 * su) ** 2)) * spill : 0;
+    // slow twinkle, per-mote phase
+    const twinkle = 0.7 + 0.3 * Math.sin(frame / (9 + random(`${seed}tw`) * 14) + i * 2.1);
+    const opacity = (0.045 + lightBoost) * twinkle;
     const r = (1.6 + random(`${seed}r`) * 2.6) * su;
     motes.push(
       <circle
@@ -66,7 +69,7 @@ export const Atmosphere: React.FC<Props> = ({t, layout}) => {
     const by = (0.35 + random(`${seed}y`) * 0.55) * height;
     const x = bx + Math.sin(frame / 110 + i * 2.9) * 30 * su;
     const y = by + Math.cos(frame / 130 + i * 2.1) * 22 * su;
-    const r = (42 + random(`${seed}r`) * 52) * su;
+    const r = (42 + random(`${seed}r`) * 52) * su * (1 + 0.08 * Math.sin(frame / 50 + i * 1.3));
     bokeh.push(
       <circle
         key={i}

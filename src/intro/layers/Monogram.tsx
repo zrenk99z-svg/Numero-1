@@ -152,12 +152,16 @@ export const Monogram: React.FC<Props> = ({t, layout, variant}) => {
           </mask>
         </defs>
 
-        {/* wide ambient ember glow around the strokes being written */}
+        {/* three-layer bloom around the strokes being written: wide ambient,
+            mid halo, tight hot rim — photographic falloff */}
         <g opacity={0.16 * glowLife} style={{filter: 'blur(85px)'}}>
           {renderGlowStrokes(glyph, 1, 120)}
         </g>
         <g opacity={0.3 * glowLife} style={{filter: 'blur(30px)'}}>
           {renderGlowStrokes(glyph, 1, 30)}
+        </g>
+        <g opacity={0.26 * glowLife} style={{filter: 'blur(12px)'}}>
+          {renderGlowStrokes(glyph, 1, 8)}
         </g>
 
         {/* the letterform itself, revealed along the engraving */}

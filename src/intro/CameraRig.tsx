@@ -25,13 +25,16 @@ export const CameraRig: React.FC<Props> = ({t, layout, children}) => {
     },
   );
 
-  // fusion shake: 2% of frame height, 6 frames, quadratic decay
+  // fusion shake: 2% of frame height, 6 frames, quadratic decay.
+  // A real hit is directional: an initial down-right punch that rings out,
+  // with seeded noise on top so it never feels synthetic.
   const shakeT = (frame - t.impact) / 6;
   const shakeAmp =
     shakeT >= 0 && shakeT < 1 ? 0.02 * height * (1 - shakeT) * (1 - shakeT) : 0;
   const f0 = Math.floor(frame);
-  const shakeX = shakeAmp * (random(`shx-${f0}`) - 0.5) * 2;
-  const shakeY = shakeAmp * (random(`shy-${f0}`) - 0.5) * 2;
+  const ring = Math.cos(shakeT * Math.PI * 3); // ~1.5 oscillations over 6 f
+  const shakeX = shakeAmp * (0.6 * 0.7 * ring + 0.4 * (random(`shx-${f0}`) - 0.5) * 2);
+  const shakeY = shakeAmp * (0.6 * ring + 0.4 * (random(`shy-${f0}`) - 0.5) * 2);
   const shakeRot = shakeAmp > 0 ? 0.28 * (1 - shakeT) * (random(`shr-${f0}`) - 0.5) : 0;
 
   // handheld drift — never perfectly still

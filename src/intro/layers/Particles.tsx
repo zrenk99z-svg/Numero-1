@@ -14,6 +14,10 @@ type Spark = {
   opacity: number;
   cream: boolean;
   blur: number;
+  /** current velocity (u/frame) — young fast sparks render as motion streaks */
+  vx?: number;
+  vy?: number;
+  age?: number;
 };
 
 const CLAMP = {
@@ -62,6 +66,9 @@ export const Particles: React.FC<Props> = ({t, layout}) => {
         opacity: 0.9 * (1 - u) * (1 - u),
         cream: random(`${seed}c`) < 0.3,
         blur: foreground ? 7 : 1.2,
+        vx: dirX,
+        vy: dirY + 0.62 * age,
+        age,
       });
     }
   }
@@ -79,6 +86,7 @@ export const Particles: React.FC<Props> = ({t, layout}) => {
       const speed = 22 + random(`${seed}s`) * 40;
       const decel = 1 - 0.5 * u;
       const dist = speed * burstAge * decel;
+      const velNow = speed * decel * (1 - 0.5 * u);
       sparks.push({
         x: FUSION.x + Math.cos(ang) * dist * 1.2,
         y: FUSION.y + Math.sin(ang) * dist - 14 * burstAge * 0.3 + 0.8 * burstAge * burstAge,
@@ -86,6 +94,28 @@ export const Particles: React.FC<Props> = ({t, layout}) => {
         opacity: 1.15 * (1 - u) * (1 - u),
         cream: random(`${seed}c`) < 0.4,
         blur: random(`${seed}f`) < 0.25 ? 6 : 1.2,
+        vx: Math.cos(ang) * velNow * 1.2,
+        vy: Math.sin(ang) * velNow,
+        age: burstAge,
+      });
+    }
+  }
+
+  // ---- Scenes 5–6: the ember that never dies sheds a tiny spark now & then
+  if (frame > t.land + 16) {
+    for (let k = 0; k < 4; k++) {
+      const sf = t.land + 20 + k * 44 + Math.floor(random(`nd-${k}`) * 18);
+      const age = frame - sf;
+      const life = 24;
+      if (age < 0 || age > life) continue;
+      const u = age / life;
+      sparks.push({
+        x: DOT_CX + (random(`nd-${k}x`) - 0.5) * 30 + Math.sin(age / 5 + k) * 9,
+        y: DOT_CY - 30 - age * (2.2 + random(`nd-${k}v`) * 1.6),
+        r: 3.2 * (1 - u * 0.7),
+        opacity: 0.5 * Math.sin(Math.PI * Math.min(1, u * 1.15)),
+        cream: false,
+        blur: 1.2,
       });
     }
   }
@@ -111,7 +141,13 @@ export const Particles: React.FC<Props> = ({t, layout}) => {
     }
   }
 
-  if (sparks.length === 0) return null;
+  // ---- fusion shockwave + one-frame white-hot core flash ------------------
+  const waveU = interpolate(frame, [t.impact, t.impact + 5], [0, 1], CLAMP);
+  const showWave = frame >= t.impact && waveU < 1;
+  const flashU = interpolate(frame, [t.impact, t.impact + 2], [0, 1], CLAMP);
+  const showFlash = frame >= t.impact && flashU < 1;
+
+  if (sparks.length === 0 && !showWave && !showFlash) return null;
 
   // ambient dim on everything as exposure settles
   const settle = interpolate(frame, [t.exposureStart, t.exposureEnd], [1, 0.94], CLAMP);
@@ -121,17 +157,62 @@ export const Particles: React.FC<Props> = ({t, layout}) => {
       transform={`translate(${cx} ${cy}) scale(${K}) translate(${-MARK_CX} ${-MARK_CY})`}
       opacity={settle}
     >
-      {sparks.map((s, i) => (
+      {showWave ? (
         <circle
-          key={i}
-          cx={s.x}
-          cy={s.y}
-          r={Math.max(0.4, s.r)}
-          fill={s.cream ? COLORS.cream : `rgba(${EMBER_RGB}, 1)`}
-          opacity={Math.max(0, Math.min(1, s.opacity))}
-          style={s.blur > 2 ? {filter: `blur(${s.blur}px)`} : undefined}
+          cx={FUSION.x}
+          cy={FUSION.y}
+          r={40 + waveU * 400}
+          fill="none"
+          stroke={`rgba(${EMBER_RGB}, 1)`}
+          strokeWidth={26 * (1 - waveU) + 2}
+          opacity={0.55 * (1 - waveU) ** 1.5}
+          style={{filter: 'blur(9px)'}}
         />
-      ))}
+      ) : null}
+      {showFlash ? (
+        <circle
+          cx={FUSION.x}
+          cy={FUSION.y}
+          r={60 + flashU * 130}
+          fill={COLORS.cream}
+          opacity={0.55 * (1 - flashU)}
+          style={{filter: 'blur(22px)'}}
+        />
+      ) : null}
+      {sparks.map((s, i) => {
+        const color = s.cream ? COLORS.cream : `rgba(${EMBER_RGB}, 1)`;
+        const opacity = Math.max(0, Math.min(1, s.opacity));
+        const fast =
+          s.vx !== undefined &&
+          s.vy !== undefined &&
+          (s.age ?? 99) < 3.5 &&
+          Math.hypot(s.vx, s.vy) > 5;
+        // young fast sparks stretch along their velocity — cheap motion blur
+        return fast ? (
+          <line
+            key={i}
+            x1={s.x}
+            y1={s.y}
+            x2={s.x - (s.vx as number) * 1.7}
+            y2={s.y - (s.vy as number) * 1.7}
+            stroke={color}
+            strokeWidth={Math.max(0.8, s.r * 1.5)}
+            strokeLinecap="round"
+            opacity={opacity}
+            style={s.blur > 2 ? {filter: `blur(${s.blur}px)`} : undefined}
+          />
+        ) : (
+          <circle
+            key={i}
+            cx={s.x}
+            cy={s.y}
+            r={Math.max(0.4, s.r)}
+            fill={color}
+            opacity={opacity}
+            style={s.blur > 2 ? {filter: `blur(${s.blur}px)`} : undefined}
+          />
+        );
+      })}
     </g>
   );
 };
