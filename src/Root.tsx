@@ -1,6 +1,7 @@
 import './index.css';
-import './fonts';
 import {Composition} from 'remotion';
+import {EndCard} from './endcard/EndCard';
+import {ensureBrandFonts} from './fonts';
 import {RefugioNerdIntro} from './intro/RefugioNerdIntro';
 import {TIMINGS} from './intro/timings';
 
@@ -14,6 +15,7 @@ import {TIMINGS} from './intro/timings';
  * Render: npx remotion render RefugioNerdIntro out/intro-4k.mp4
  */
 export const RemotionRoot: React.FC = () => {
+  ensureBrandFonts();
   return (
     <>
       <Composition
@@ -55,6 +57,21 @@ export const RemotionRoot: React.FC = () => {
         width={3840}
         height={2160}
         defaultProps={{variant: 'short' as const}}
+      />
+      <Composition
+        id="RefugioNerdEndCard"
+        component={EndCard}
+        durationInFrames={288}
+        fps={24}
+        width={3840}
+        height={2160}
+        defaultProps={{
+          title: 'OBRIGADO POR ASSISTIR',
+          leftLabel: 'PRÓXIMO VÍDEO',
+          rightLabel: 'RECOMENDADO',
+          subscribeLabel: 'INSCREVA-SE',
+          subscribeNote: '( é de graça )',
+        }}
       />
       <Composition
         id="RefugioNerdIntroVertical"
