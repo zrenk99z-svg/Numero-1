@@ -9,13 +9,13 @@ const CLAMP = {
   extrapolateRight: 'clamp',
 } as const;
 
-type Props = {t: IntroTiming; layout: Layout};
+type Props = {t: IntroTiming; layout: Layout; showTagline: boolean};
 
 /**
- * Scene 5 — REFÚGIO NERD (Archivo Black, bottom-to-top wipe) and
+ * Scene 5 — REFÚGIO NERD (Archivo Black, bottom-to-top wipe) and, optionally,
  * FILMES · SÉRIES · HQs (Space Mono, wide tracking, fade-in).
  */
-export const TitleLockup: React.FC<Props> = ({t, layout}) => {
+export const TitleLockup: React.FC<Props> = ({t, layout, showTagline}) => {
   const frame = useCurrentFrame();
   const {K} = layout;
 
@@ -23,10 +23,12 @@ export const TitleLockup: React.FC<Props> = ({t, layout}) => {
     ...CLAMP,
     easing: Easing.out(Easing.cubic),
   });
-  const tagFade = interpolate(frame, [t.tagIn, t.tagInEnd], [0, 1], {
-    ...CLAMP,
-    easing: Easing.out(Easing.quad),
-  });
+  const tagFade = showTagline
+    ? interpolate(frame, [t.tagIn, t.tagInEnd], [0, 1], {
+        ...CLAMP,
+        easing: Easing.out(Easing.quad),
+      })
+    : 0;
 
   if (wipe <= 0 && tagFade <= 0) return null;
 
@@ -64,21 +66,23 @@ export const TitleLockup: React.FC<Props> = ({t, layout}) => {
       >
         REFÚGIO NERD
       </div>
-      <div
-        style={{
-          fontFamily: "'Space Mono', monospace",
-          fontWeight: 400,
-          fontSize: tagSize,
-          color: COLORS.cream,
-          opacity: tagFade * 0.72,
-          letterSpacing: '0.62em',
-          marginRight: '-0.62em',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        FILMES <span style={{opacity: 0.55}}>·</span> SÉRIES{' '}
-        <span style={{opacity: 0.55}}>·</span> HQs
-      </div>
+      {showTagline ? (
+        <div
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontWeight: 400,
+            fontSize: tagSize,
+            color: COLORS.cream,
+            opacity: tagFade * 0.72,
+            letterSpacing: '0.62em',
+            marginRight: '-0.62em',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          FILMES <span style={{opacity: 0.55}}>·</span> SÉRIES{' '}
+          <span style={{opacity: 0.55}}>·</span> HQs
+        </div>
+      ) : null}
     </div>
   );
 };

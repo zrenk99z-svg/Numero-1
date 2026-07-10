@@ -26,6 +26,15 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{variant: 'full' as const}}
       />
       <Composition
+        id="RefugioNerdIntroNoTagline"
+        component={RefugioNerdIntro}
+        durationInFrames={TIMINGS.full.duration}
+        fps={24}
+        width={3840}
+        height={2160}
+        defaultProps={{variant: 'full' as const, showTagline: false}}
+      />
+      <Composition
         id="RefugioNerdIntroShort"
         component={RefugioNerdIntro}
         durationInFrames={TIMINGS.short.duration}

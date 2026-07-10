@@ -13,6 +13,7 @@ prompts, soundtrack brief, version notes): [`docs/INTRO_SPEC.md`](docs/INTRO_SPE
 | ID | Format | Duration |
 |---|---|---|
 | `RefugioNerdIntro` | 3840×2160 · 24 fps | 7 s (168 f) — master |
+| `RefugioNerdIntroNoTagline` | 3840×2160 · 24 fps | 7 s — master without the FILMES · SÉRIES · HQs line |
 | `RefugioNerdIntroShort` | 3840×2160 · 24 fps | 3 s (72 f) — Scenes 4–6 |
 | `RefugioNerdIntroVertical` | 1080×1920 · 24 fps | 7 s — Shorts/Reels |
 

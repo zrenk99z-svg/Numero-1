@@ -13,13 +13,18 @@ import {TIMINGS, type Variant} from './timings';
 
 export type RefugioNerdIntroProps = {
   variant: Variant;
+  /** omit the FILMES · SÉRIES · HQs line (default: shown) */
+  showTagline?: boolean;
 };
 
 /**
  * REFÚGIO NERD — "A brasa que não apaga" / The ember that never dies.
  * 7 s master intro (or the 3 s short: Scenes 4–6). See docs/INTRO_SPEC.md.
  */
-export const RefugioNerdIntro: React.FC<RefugioNerdIntroProps> = ({variant}) => {
+export const RefugioNerdIntro: React.FC<RefugioNerdIntroProps> = ({
+  variant,
+  showTagline = true,
+}) => {
   const {width, height} = useVideoConfig();
   const t = TIMINGS[variant];
   const layout = useMemo(() => makeLayout(width, height), [width, height]);
@@ -39,7 +44,7 @@ export const RefugioNerdIntro: React.FC<RefugioNerdIntroProps> = ({variant}) => 
           <Particles t={t} layout={layout} />
           <Ember t={t} layout={layout} />
         </svg>
-        <TitleLockup t={t} layout={layout} />
+        <TitleLockup t={t} layout={layout} showTagline={showTagline} />
       </CameraRig>
       <Framing t={t} layout={layout} />
     </AbsoluteFill>
