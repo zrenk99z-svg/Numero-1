@@ -3,18 +3,25 @@ import type { VideoIdea } from "./types";
 import { generateIdeas } from "./lib/ideaGenerator";
 import { rankIdeas } from "./lib/scoring";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useSettings, type Settings } from "./lib/settings";
 
 import { SearchBar } from "./components/SearchBar";
 import { IdeaCard } from "./components/IdeaCard";
-import { TrendRadar } from "./components/TrendRadar";
+import { LiveTrends } from "./components/LiveTrends";
 import { ViralMode } from "./components/ViralMode";
 import { SavedList } from "./components/SavedList";
-import { FireIcon, RadarIcon, SparkIcon } from "./components/Icons";
+import { CompetitionPanel } from "./components/CompetitionPanel";
+import { TitleLab } from "./components/TitleLab";
+import { EditorialCalendar } from "./components/EditorialCalendar";
+import { SettingsPanel } from "./components/SettingsPanel";
+import { FireIcon, GearIcon, RadarIcon, SparkIcon } from "./components/Icons";
 
 const STORAGE_KEY = "refugio-nerd:proximos-videos";
 
 export default function App() {
   const [saved, setSaved] = useLocalStorage<VideoIdea[]>(STORAGE_KEY, []);
+  const [settings, setSettings] = useSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [ideas, setIdeas] = useState<VideoIdea[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +33,6 @@ export default function App() {
   function handleSearch(term: string) {
     setLoading(true);
     setSubject(term);
-    // pequeno delay para dar feedback de "gerando"
     window.setTimeout(() => {
       setIdeas(generateIdeas(term));
       setLoading(false);
@@ -44,9 +50,13 @@ export default function App() {
     );
   }
 
+  function patchSettings(p: Partial<Settings>) {
+    setSettings((s) => ({ ...s, ...p }));
+  }
+
   return (
     <div className="min-h-screen">
-      <Header savedCount={saved.length} />
+      <Header savedCount={saved.length} onOpenSettings={() => setSettingsOpen(true)} />
 
       <main className="mx-auto max-w-7xl space-y-14 px-4 pb-24 sm:px-6">
         {/* Hero + busca */}
@@ -63,8 +73,8 @@ export default function App() {
               do Refúgio Nerd
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-slate-400">
-              Digite um assunto e receba 20 ideias pontuadas por interesse,
-              busca, produção e potencial de thumbnail.
+              Digite um assunto e receba 20 ideias pontuadas, análise de
+              concorrência, títulos com alto CTR e um calendário editorial.
             </p>
           </div>
 
@@ -77,6 +87,8 @@ export default function App() {
         <section id="resultados" className="scroll-mt-24 space-y-6">
           {ideas.length > 0 && (
             <>
+              <CompetitionPanel subject={subject} settings={settings} />
+
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2 className="font-display text-lg font-bold text-slate-100">
@@ -136,7 +148,16 @@ export default function App() {
           )}
         </section>
 
-        <TrendRadar onExplore={handleSearch} />
+        {/* Gerador de títulos com alto CTR — depende de um assunto */}
+        {subject && <TitleLab subject={subject} settings={settings} />}
+
+        <LiveTrends
+          settings={settings}
+          subject={subject || undefined}
+          onExplore={handleSearch}
+        />
+
+        <EditorialCalendar saved={saved} />
 
         <SavedList
           saved={saved}
@@ -146,11 +167,24 @@ export default function App() {
       </main>
 
       <Footer />
+
+      <SettingsPanel
+        open={settingsOpen}
+        settings={settings}
+        onChange={patchSettings}
+        onClose={() => setSettingsOpen(false)}
+      />
     </div>
   );
 }
 
-function Header({ savedCount }: { savedCount: number }) {
+function Header({
+  savedCount,
+  onOpenSettings,
+}: {
+  savedCount: number;
+  onOpenSettings: () => void;
+}) {
   return (
     <header className="sticky top-0 z-20 border-b border-white/5 bg-void-900/70 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
@@ -167,26 +201,38 @@ function Header({ savedCount }: { savedCount: number }) {
             </span>
           </span>
         </a>
-        <nav className="hidden items-center gap-6 text-sm text-slate-400 md:flex">
+        <nav className="hidden items-center gap-6 text-sm text-slate-400 lg:flex">
           <a href="#tendencias" className="transition hover:text-slate-100">
             Tendências
           </a>
-          <a href="#viral" className="transition hover:text-slate-100">
-            Modo Viral
+          <a href="#titulos" className="transition hover:text-slate-100">
+            Títulos CTR
+          </a>
+          <a href="#calendario" className="transition hover:text-slate-100">
+            Calendário
           </a>
           <a href="#proximos" className="transition hover:text-slate-100">
             Próximos Vídeos
           </a>
         </nav>
-        <a
-          href="#proximos"
-          className="inline-flex items-center gap-2 rounded-xl glass px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-electric-500/40"
-        >
-          <span className="grid h-5 w-5 place-items-center rounded-full bg-grape-500/20 text-[11px] font-bold text-grape-400">
-            {savedCount}
-          </span>
-          Salvos
-        </a>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenSettings}
+            aria-label="Configurações"
+            className="grid h-9 w-9 place-items-center rounded-xl glass text-slate-300 transition hover:border-electric-500/40 hover:text-white"
+          >
+            <GearIcon className="h-5 w-5" />
+          </button>
+          <a
+            href="#proximos"
+            className="inline-flex items-center gap-2 rounded-xl glass px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-electric-500/40"
+          >
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-grape-500/20 text-[11px] font-bold text-grape-400">
+              {savedCount}
+            </span>
+            Salvos
+          </a>
+        </div>
       </div>
     </header>
   );
@@ -197,7 +243,8 @@ function Footer() {
     <footer className="border-t border-white/5 py-8">
       <div className="mx-auto max-w-7xl px-4 text-center text-sm text-slate-500 sm:px-6">
         <p>
-          Refúgio Nerd — Radar de Vídeos · dados de demonstração simulados ·
+          Refúgio Nerd — Radar de Vídeos · fontes reais quando configuradas
+          (Reddit · YouTube · Google Trends), com fallback simulado · dados
           salvos localmente no seu navegador.
         </p>
       </div>
