@@ -7,8 +7,17 @@
  * - Adiciona X-Robots-Tag: noindex, nofollow em todas as respostas para
  *   impedir indexação por mecanismos de busca.
  *
- * Sem SITE_PASSWORD configurada, o site fica bloqueado (fail-closed).
+ * Comportamento da senha:
+ *   - SITE_PASSWORD definida  -> site PRIVADO (exige usuário + senha).
+ *   - SITE_PASSWORD ausente    -> site PÚBLICO (abre direto), mas ainda noindex.
+ * Ou seja: por padrão o site abre; basta definir SITE_PASSWORD para trancá-lo.
  */
+
+function withNoindex(response) {
+  const out = new Response(response.body, response);
+  out.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  return out;
+}
 
 function timingSafeEqual(a, b) {
   if (a.length !== b.length) return false;
@@ -38,11 +47,9 @@ export async function onRequest(context) {
   const expectedUser = env.SITE_USER || "refugio";
   const expectedPass = env.SITE_PASSWORD;
 
-  // Fail-closed: se a senha não foi configurada, não serve o site.
+  // Sem senha configurada: site público (abre direto), mantendo o noindex.
   if (!expectedPass) {
-    return unauthorized(
-      "Site não configurado: defina a variável SITE_PASSWORD no Cloudflare Pages.",
-    );
+    return withNoindex(await next());
   }
 
   const header = request.headers.get("Authorization") || "";
@@ -62,10 +69,7 @@ export async function onRequest(context) {
       timingSafeEqual(pass, expectedPass)
     ) {
       // Autenticado: segue para o conteúdo, mas ainda com noindex.
-      const response = await next();
-      const out = new Response(response.body, response);
-      out.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
-      return out;
+      return withNoindex(await next());
     }
   }
 
