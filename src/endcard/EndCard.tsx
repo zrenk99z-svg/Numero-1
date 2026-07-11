@@ -316,6 +316,7 @@ export const EndCard: React.FC<EndCardProps> = ({
         >
           {title}
         </span>
+        {/* the brand period: bottom tangent on the text baseline, like the logo */}
         <span
           style={{
             width: 38 * su * dotPop * (1 + 0.05 * wave),
@@ -323,8 +324,6 @@ export const EndCard: React.FC<EndCardProps> = ({
             borderRadius: '50%',
             background: COLORS.ember,
             boxShadow: `0 0 ${46 * su * (0.5 + 0.5 * wave)}px rgba(${EMBER_RGB}, 0.55)`,
-            alignSelf: 'flex-end',
-            marginBottom: 6 * su,
           }}
         />
       </div>
