@@ -59,9 +59,34 @@ automaticamente para dados simulados, claramente sinalizados na interface.
 > bloqueado por CORS dependendo do navegador; nesse caso, o fallback simulado
 > assume.
 
+## Progressive Web App (PWA)
+
+O app é instalável e funciona offline:
+
+- **Instalável na tela inicial** — no iPhone (Safari): toque em **Compartilhar →
+  “Adicionar à Tela de Início”**. No Android/desktop (Chrome/Edge) aparece um
+  botão **Instalar**. Um banner com essas instruções aparece automaticamente
+  (dispensável).
+- **Tela cheia (standalone)** — abre sem a barra do navegador, com a barra de
+  status integrada (`black-translucent`) e respeitando o *notch* via
+  `env(safe-area-inset-*)`.
+- **Offline** — um *service worker* (Workbox, via `vite-plugin-pwa`) faz
+  *precache* do app shell e dos assets; as fontes do Google são cacheadas em
+  runtime. Depois da primeira visita, o app abre sem rede (os dados ao vivo,
+  naturalmente, exigem conexão).
+- **Manifesto e ícones** — `manifest.webmanifest` gerado no build, com ícones
+  192/512 e um ícone *maskable*, além de `apple-touch-icon` (180) para iOS.
+- **Mobile-first** — layout totalmente responsivo, sem rolagem horizontal,
+  alvos de toque confortáveis e sem realce de toque azul.
+
+> O service worker só roda no build de produção (`npm run build` + `npm run
+> preview`), não em `npm run dev`. Instalação e *precache* exigem HTTPS (ou
+> `localhost`).
+
 ## Tecnologias
 
-React 18 · TypeScript · Vite · Tailwind CSS · `localStorage` (sem back-end).
+React 18 · TypeScript · Vite · Tailwind CSS · `vite-plugin-pwa` (Workbox) ·
+`localStorage` (sem back-end).
 
 ## Como executar localmente
 

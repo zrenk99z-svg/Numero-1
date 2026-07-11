@@ -74,7 +74,7 @@ export function LiveTrends({ settings, subject, onExplore }: Props) {
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
           {results.map((r) => (
-            <div key={r.source} className="card-glow p-4">
+            <div key={r.source} className="card-glow min-w-0 p-4">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-slate-100">
                   {SOURCE_LABEL[r.source]}

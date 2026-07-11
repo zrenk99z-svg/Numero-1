@@ -14,6 +14,7 @@ import { CompetitionPanel } from "./components/CompetitionPanel";
 import { TitleLab } from "./components/TitleLab";
 import { EditorialCalendar } from "./components/EditorialCalendar";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { InstallPrompt } from "./components/InstallPrompt";
 import { FireIcon, GearIcon, RadarIcon, SparkIcon } from "./components/Icons";
 
 const STORAGE_KEY = "refugio-nerd:proximos-videos";
@@ -174,6 +175,8 @@ export default function App() {
         onChange={patchSettings}
         onClose={() => setSettingsOpen(false)}
       />
+
+      <InstallPrompt />
     </div>
   );
 }
@@ -186,7 +189,7 @@ function Header({
   onOpenSettings: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-white/5 bg-void-900/70 backdrop-blur-md">
+    <header className="safe-top sticky top-0 z-20 border-b border-white/5 bg-void-900/70 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <a href="#" className="flex items-center gap-3">
           <span className="relative grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-electric-500 to-grape-500 shadow-glow-grape">
@@ -240,7 +243,7 @@ function Header({
 
 function Footer() {
   return (
-    <footer className="border-t border-white/5 py-8">
+    <footer className="safe-bottom border-t border-white/5 py-8">
       <div className="mx-auto max-w-7xl px-4 text-center text-sm text-slate-500 sm:px-6">
         <p>
           Refúgio Nerd — Radar de Vídeos · fontes reais quando configuradas
