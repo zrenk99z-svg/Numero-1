@@ -6,3 +6,9 @@ build
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
