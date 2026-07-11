@@ -299,7 +299,7 @@ export const EndCard: React.FC<EndCardProps> = ({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'baseline',
-          gap: 26 * su,
+          gap: 11 * su,
           clipPath: `inset(${(1 - titleWipe) * 104}% -5% -5% -5%)`,
           transform: `translateY(${(1 - titleWipe) * 30 * su}px)`,
         }}
